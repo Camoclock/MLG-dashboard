@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Monaco Legend Group - Asta Orologi 31 Ott-1 Nov 2026 | Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0f1218;--card:#181d27;--line:#2a3140;--tx:#e8ebf0;--mut:#8b94a7;--gold:#c9a45c;--ok:#4fbf8b;--bad:#e5645f}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--tx)}
+header{padding:28px 32px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,#1b2130,#0f1218)}
+h1{margin:0;font-size:26px;color:var(--gold);letter-spacing:.5px}header p{margin:6px 0 0;color:var(--mut);font-size:14px}
+nav{display:flex;gap:6px;padding:10px 32px;background:#121722;position:sticky;top:0;z-index:5;border-bottom:1px solid var(--line);flex-wrap:wrap}
+nav button{background:none;border:1px solid var(--line);color:var(--mut);padding:8px 14px;border-radius:20px;cursor:pointer;font-size:13px}
+nav button.on{background:var(--gold);color:#111;border-color:var(--gold);font-weight:600}
+main{padding:24px 32px;max-width:1500px;margin:auto}.tab{display:none}.tab.on{display:block}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:20px}
+.kpi,.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.kpi b{display:block;font-size:24px;color:var(--gold);margin-top:4px}.kpi span{font-size:12px;color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px;margin-bottom:16px}
+.card h3{margin:0 0 10px;font-size:15px}.card canvas{max-height:340px}.note{font-size:12px;color:var(--mut);margin-top:8px;line-height:1.5}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.filters input,.filters select{background:#10141c;border:1px solid var(--line);color:var(--tx);padding:8px 10px;border-radius:8px;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{position:sticky;top:50px;background:#121722;color:var(--gold);cursor:pointer;white-space:nowrap}tr:hover td{background:#1d2330}
+.num{text-align:right;white-space:nowrap}.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10.5px;margin:1px;background:#262d3d;color:#cfd5e3}
+.tag.g{background:#2d3a2f;color:var(--ok)}.tag.y{background:#3b3322;color:var(--gold)}.tag.r{background:#3d2626;color:var(--bad)}
+.wrap{overflow:auto;max-height:78vh;border:1px solid var(--line);border-radius:12px}
+a{color:var(--gold)}input.m{width:90px;background:#10141c;border:1px solid var(--line);color:var(--tx);padding:4px;border-radius:6px;text-align:right}
+.pos{color:var(--ok)}.neg{color:var(--bad)}
+</style></head><body>
+<header><h1>Monaco Legend Group - Exclusive Timepieces</h1>
+<p>Hotel Meridien Beach Plaza, Monaco | Sessione 1: 31 ott 2026, lotti 1-121 | Sessione 2: 1 nov 2026, lotti 122-234 | Anteprima 29 ott-1 nov | Dati estratti dal catalogo PDF (stime in EUR)</p></header>
+<nav id="nav"></nav>
+<main>
+<section class="tab on" id="t0">
+<div class="kpis" id="kpis"></div>
+<div class="grid">
+<div class="card"><h3>Lotti per marchio (Top 15)</h3><canvas id="c1"></canvas></div>
+<div class="card"><h3>Valore stimato (mid) per marchio - Top 15, EUR</h3><canvas id="c2"></canvas></div>
+<div class="card"><h3>Distribuzione lotti per fascia di stima (mid)</h3><canvas id="c3"></canvas></div>
+<div class="card"><h3>Materiale della cassa</h3><canvas id="c4"></canvas></div>
+<div class="card"><h3>Lotti per epoca</h3><canvas id="c5"></canvas></div>
+<div class="card"><h3>Mid-stima media per epoca (EUR)</h3><canvas id="c6"></canvas></div>
+</div>
+<div class="card"><h3>Top 15 lotti per stima</h3><div id="top"></div></div>
+</section>
+
+<section class="tab" id="t1">
+<div class="filters">
+<input id="q" placeholder="Cerca marchio, modello, ref, nota...">
+<select id="fb"><option value="">Tutti i marchi</option></select>
+<select id="fm"><option value="">Tutti i materiali</option></select>
+<select id="fs"><option value="">Tutte le sessioni</option><option>1</option><option>2</option></select>
+<select id="fd"><option value="">Tutti i driver</option></select>
+<input id="pmin" type="number" placeholder="Stima min EUR" style="width:130px"><input id="pmax" type="number" placeholder="Stima max EUR" style="width:130px">
+<label style="font-size:13px;color:var(--mut)">Premio d'asta % <input id="prem" type="number" value="0" style="width:60px"></label>
+<span id="cnt" style="color:var(--mut);font-size:13px"></span>
+</div>
+<div class="wrap"><table id="tb"></table></div>
+<p class="note">Clic sulle intestazioni per ordinare. Il premio d'asta non e indicato nel catalogo estratto: inserisci quello delle condizioni di vendita per vedere il costo all-in stimato (stima + premio). Nota IVA: i lotti con asterisco hanno 20% di IVA all'import sul prezzo finale se consegnati in UE.</p>
+</section>
+
+<section class="tab" id="t2">
+<div class="kpis" id="dk"></div>
+<div class="grid">
+<div class="card"><h3>Frequenza dei driver di acquisto (n. lotti)</h3><canvas id="d1"></canvas></div>
+<div class="card"><h3>Mid-stima media per driver (EUR)</h3><canvas id="d2"></canvas></div>
+<div class="card"><h3>Stima mid: con vs senza scatola/documenti</h3><canvas id="d3"></canvas></div>
+<div class="card"><h3>Provenienza / collezioni</h3><canvas id="d4"></canvas></div>
+</div>
+<div class="card"><h3>Come leggere i driver</h3><p class="note">I driver sono derivati dal testo del catalogo (modello, note, accessori). <b>Icona</b>: Daytona, Nautilus, Royal Oak, Day-Date, GMT, Sea-Dweller, Explorer, Submariner, Milgauss. <b>Complicazione</b>: calendario perpetuo, ripetizione minuti, rattrapante, cronografo, tourbillon, ora universale. <b>Quadrante speciale</b>: smalto/cloisonne, pietre dure (lapislazzuli, malachite, corallo, occhio di tigre, giada), tropical, patina, gemma. <b>Edizione limitata</b>: serie numerate. <b>Provenienza</b>: collezioni Madhvani, Goldberger, Dorelli, emblemi reali/militari. <b>No Reserve</b>: venduto senza prezzo di riserva (opportunita di entrata). <b>Full set</b>: scatola/garanzia/estratto d'archivio. <b>Doppia firma</b>: retailer (Tiffany, Gubelin, Cartier su AP...).</p></div>
+</section>
+
+<section class="tab" id="t3">
+<div class="kpis" id="sk"></div>
+<div class="grid">
+<div class="card"><h3>Lotti No Reserve per marchio</h3><canvas id="s1"></canvas></div>
+<div class="card"><h3>Mid-stima per sessione (EUR)</h3><canvas id="s2"></canvas></div>
+</div>
+<div class="card"><h3>Shortlist: No Reserve + full set o provenienza, ordinata per stima bassa</h3><div id="short"></div></div>
+</section>
+
+<section class="tab" id="t4">
+<div class="card"><h3>Confronto con mercato (EveryWatch / Chrono24)</h3>
+<p class="note">Questi portali richiedono abbonamento/login e non sono interrogabili in automatico: i prezzi di riferimento <b>non sono inclusi per non inventare dati</b>. Per ogni lotto trovi i link di ricerca pre-compilati; inserisci il prezzo di mercato (EUR) e la dashboard calcola lo scarto rispetto alla stima. I valori restano salvati nel tuo browser (localStorage) e puoi esportarli in CSV.</p>
+<div class="filters"><input id="q2" placeholder="Cerca lotto..."><select id="fb2"><option value="">Tutti i marchi</option></select>
+<button onclick="exportCSV()" style="background:var(--gold);border:0;padding:8px 14px;border-radius:8px;cursor:pointer">Esporta CSV</button><span id="cmpsum" style="color:var(--mut);font-size:13px"></span></div>
+<div class="wrap"><table id="cmp"></table></div></div>
+<div class="card" style="margin-top:16px"><h3>Scarto stima vs mercato (lotti compilati)</h3><canvas id="cc"></canvas></div>
+</section>
+
+<section class="tab" id="t5">
+<div class="card"><h3>Informazioni pratiche</h3>
+<ul class="note" style="font-size:13.5px;line-height:1.8">
+<li><b>Sede:</b> Hotel Meridien Beach Plaza, Monaco. Sessione 1 sabato 31/10/2026 ore 14:30 (lotti 1-121); Sessione 2 domenica 1/11/2026 ore 14:30 (lotti 122-234).</li>
+<li><b>Anteprima:</b> gio 29 ott 11-20; ven 30 ott 10:30-20; sab 31 e dom 1 nov 10:00-12:30.</li>
+<li><b>Come fare offerte:</b> offerta in assenza (online/offline, form entro 24h), offerta live online (account + app Monaco Legend Group Live), telefono (form entro 24h), in sala (registrazione consigliata 48h prima, o fino a 3h prima se gia approvati).</li>
+<li><b>IVA:</b> i lotti contrassegnati * sono soggetti a 20% IVA all'importazione sul prezzo finale (premio incluso) se consegnati nella UE.</li>
+<li><b>Sito / contatti:</b> www.monacolegendauctions.com | info@monacolegendgroup.com | +377 97 77 53 35</li>
+<li><b>Collezioni speciali:</b> Roni Madhvani (Cartier, Patek, Vacheron; lotti 54-57 e altri), John Goldberger (Cartier London, lotti 50, 118, 131, 146, 156, 178, 214), Johnny Dorelli (Blancpain, IWC, Daniel Roth, Breguet).</li>
+<li><b>Contesto di mercato (lettera del Chairman):</b> pochi giorni prima, quattro Rolex Daytona hanno totalizzato circa 50 milioni di USD in asta; crescente interesse per orologi da tasca, Art Nouveau/Art Deco e design vintage; attenzione a rarita, originalita, provenienza e condizione.</li>
+<li><b>Cautele:</b> stime e dati sono estratti automaticamente dal PDF via OCR: verifica sempre sul catalogo ufficiale prima di offrire. I lotti dove il catalogo non riportava la ref sono lasciati vuoti.</li>
+</ul></div>
+</section>
+</main>
+<script>
+const RAW=`1|Ulysse Nardin|Split Seconds Chronograph||18K yellow gold|1990s|8000|16000|Y|N|N||No. 1
+2|Lucien Rochat|Chronograph Split-Seconds||18K yellow gold|1990s|7000|14000|Y|N|Y||limited 30 pieces
+3|Rolex|Texano|5100|18K white gold|1972|40000|80000|N|N|N||Beta 21 quartz
+4|Cartier|Declaration|2611|white gold titanium diamonds|2005|5000|10000|Y|N|N||diamond rings
+5|Vacheron Constantin|Patrimony|47200/1|18K yellow gold|2000|5000|10000|Y|N|N||guilloche dial
+6|Rolex|Daytona|6265|stainless steel|1980|50000|100000|N|Y|Y||floating Big Red
+7|Rolex|Chronograph Pocket Watch|2900|18K yellow gold|1964|7000|14000|N|N|N||black lacquer dial
+8|Rolex|Day-Date|18038|18K yellow gold|1982|20000|40000|N|Y|N||Japanese wood dial
+9|Gerald Genta|Perpetual Calendar|G1993.8|white gold diamonds|1980s|10000|20000|N|N|N||skeletonized dial
+10|Patek Philippe|Calatrava Matterhorn|5089G-030|18K white gold|2015|100000|200000|N|N|Y||cloisonne enamel Tiffany
+11|Patek Philippe|Carree|3485|18K white gold|1960s|15000|30000|N|N|N||square case
+12|Patek Philippe|Carree||18K white gold|1970s|5000|10000|N|N|N||Ecoffey bracelet
+13|Zenith|Chronograph Compur||stainless steel|1940s|3000|6000|N|N|N||bi-compax dial
+14|Vacheron Constantin|Mosaic||18K white gold diamonds|1970s|20000|40000|N|Y|N||mother-of-pearl onyx mosaic
+15|Cartier|Tank Normale CPCP|WGTA0109|platinum|2024|15000|30000|N|N|Y||limited 200 pieces
+16|Blancpain|Villeret Minute Repeater|0033|18K yellow gold|1980s|20000|40000|N|N|Y|Johnny Dorelli Collection|case number 2
+17|Patek Philippe|Gondolo 10 Days Millennium|5100|18K pink gold|2001|18000|36000|N|N|Y||limited pink gold edition
+18|Cartier|Tank Normale||18K yellow gold|1940s|25000|50000|N|N|Y||French-made Art Deco Tank
+19|Rolex|Datejust|16018|18K yellow gold|1988|12000|24000|N|N|N||onyx diamond Arabic dial
+20|Cartier|Tonneau Bamboo||18K yellow gold|1996|50000|100000|N|N|N||Paris dial
+21|Piaget|Pocket Watch||18K yellow gold|1980s|5000|10000|Y|N|N||green jade dial
+22|Rolex|Day-Date|1803|18K pink gold|1961|10000|20000|N|N|N||silver sunburst dial
+23|Breguet|Classique Perpetual Calendar|3050BA|18K yellow gold|1980s|15000|30000|N|N|N|Johnny Dorelli Collection|Pre-A series
+24|Rolex|Day-Date|18078|18K yellow gold|1984|35000|70000|N|Y|N||rubellite diamond-index dial
+25|Eberhard & Co|Pre Extra-Fort Rattrapante||stainless steel|1940s|15000|30000|N|N|N||black gilt dial
+26|Universal Geneve|Cloisonne Enamel|112167|18K yellow gold|1950s|30000|60000|N|N|N||medieval battle enamel
+27|Rolex|Day-Date|118348|yellow gold diamonds|2001|40000|80000|N|Y|Y||pave ruby dial
+28|Patek Philippe|Calatrava Convertible|3418|stainless steel|1958|20000|40000|N|N|Y||black dial convertible
+29|Gerald Genta|Maxi Time|G2981.4|18K yellow gold|1980s|7000|14000|N|N|Y||five time zones
+30|Vacheron Constantin|Cioccolatone Triple Calendar Moon Phase|4764|18K pink gold|1952|200000|400000|N|N|Y||pink gold moonphase
+31|Patek Philippe|Chronometro Gondolo|5098R|18K pink gold|2015|10000|20000|N|N|Y||guilloche dial
+32|Patek Philippe|Perpetual Calendar|5140|18K yellow gold|2015|25000|50000|N|N|Y||opaline dial
+33|Patek Philippe|Nautilus|3710|stainless steel|2000s|50000|100000|N|N|Y||power reserve
+34|Audemars Piguet|Royal Oak Perpetual Calendar|25654|stainless steel|1987|80000|160000|N|N|Y||early smooth dial
+35|Omega|Bracelet Watch||white gold onyx|1970s|8000|16000|Y|N|N||wood diamond dial
+36|Cartier|Baignoire XL|3032|18K white gold|2010s|6000|12000|N|N|Y||guilloche dial
+37|Piaget|Altiplano Tourbillon High Jewellery|GOA44031|white gold diamonds|2023|70000|140000|N|Y|Y||pave tourbillon
+38|Cartier|Tank Cintree||18K white gold|1950s|50000|100000|N|N|N||grey patina dial
+39|Cartier|Cristallor|78095|18K white gold|1970s|10000|20000|N|N|N||Paris dial
+40|Patek Philippe|Nautilus|3700/1|18K white gold|1978|600000|1200000|N|Y|Y||Gay Freres bracelet
+41|Rolex|Datejust|1611|18K yellow gold|1979|25000|50000|N|N|Y||lapis florentine bezel
+42|Piaget|Hexagonal|9559D|18K yellow gold|1980s|5000|10000|N|Y|N||tiger eye dial
+43|Audemars Piguet|Hexagonal||18K yellow gold|1970s|10000|20000|N|Y|N||black dial
+44|Rolex|Day-Date|1803|18K pink gold|1968|40000|80000|N|N|Y||geometric textured dial
+45|Audemars Piguet|Mini Bamboo|66216|white gold diamonds|1989|40000|80000|N|N|Y||pave emerald dial
+46|Piaget|Black Tie Andy Warhol|14510|18K yellow gold|1975|60000|120000|N|Y|Y||lapis dial
+47|Piaget|Black Tie Andy Warhol|14510|18K yellow gold|1975|60000|120000|N|Y|Y||malachite dial
+48|Rolex|Day-Date|6611B|18K pink gold|1958|10000|20000|N|N|N||early Day-Date
+49|Patek Philippe|Nautilus|3800/1|stainless steel|1985|50000|100000|N|N|Y||sapphire caseback
+50|Rolex|Triple Calendar Moon Phase|6062|stainless steel|1953|1000000|2000000|N|N|N|John Goldberger Collection|Explorer dial
+51|Patek Philippe|Pocket Watch||steel pink gold|1930s|7000|14000|N|N|Y||black sector dial
+52|Patek Philippe|Calatrava|3590|18K white gold|1976|6000|12000|N|N|Y||hobnail bezel
+53|Patek Philippe|Rectangular|1580|18K yellow gold|1950s|11000|22000|N|Y|Y||reverse-scroll lugs
+54|Cartier|Pasha Arab Watch Club|WSPA0035|stainless steel|2022|10000|20000|N|Y|Y|Roni Madhvani Collection|limited 50 pieces
+55|Cartier|Lugless Cornice||18K yellow gold|1960s|60000|120000|N|Y|N|Roni Madhvani Collection|Made in France
+56|Cartier|Deck Chair||18K yellow gold|1960s|60000|120000|N|Y|N|Roni Madhvani Collection|unique tilting case
+57|Cartier|Tank Unique Piece||18K yellow gold|1960s|60000|120000|N|Y|N|Roni Madhvani Collection|enamel numerals bezel
+58|Rolex|Day-Date|18038|18K yellow gold|1977|12000|24000|N|N|N||vignette diamond dial
+59|Rolex|Daytona|116589|white gold diamonds|2002|30000|60000|N|N|Y||mother of pearl
+60|Rolex|Daytona|6239|stainless steel|1967|160000|320000|N|N|N||Paul Newman dial
+61|Rolex|Day-Date|1804|white gold diamonds|1974|12000|24000|N|N|N||blue soleil Arabic
+62|IWC|Grande Complication|3770|platinum|1991|40000|80000|N|N|Y|Johnny Dorelli Collection|limited 50 pieces
+63|Andersen Geneve|Retrograde Perpetual Calendar||18K yellow gold|1990s|15000|30000|Y|N|N||retrograde date
+64|Blancpain|Villeret Perpetual Calendar|5395|white gold diamonds|1990s|10000|20000|Y|N|N||Gay Freres bracelet
+65|Vacheron Constantin|Pendant watch|2048P|18K yellow gold|1970s|7000|14000|N|N|Y||jade dial
+66|Vacheron Constantin|Pendant watch|2048P|18K white gold|1970s|7000|14000|N|N|Y||lapis dial
+67|Vacheron Constantin|Dual Time|2088|18K white gold|1970s|10000|20000|N|Y|N||two movements
+68|Audemars Piguet|Mini Ellipse||18K yellow gold|1970s|10000|20000|N|N|N||Bulgari signed lapis
+69|Jaeger-LeCoultre|Memovox Snowdrop|73800-21|18K yellow gold|1970s|10000|20000|N|Y|Y||UFO case
+70|Cartier|Parallelogramme London||18K yellow gold|1990|100000|200000|N|N|N||asymmetric London
+71|Blancpain|Villeret Chronograph Split-Seconds|1186|platinum|1990|7000|14000|N|N|N|Johnny Dorelli Collection|number 7 of 99
+72|Patek Philippe|Calatrava||steel pink gold|1942|8000|16000|N|Y|Y||two-tone Gay Freres
+73|Rolex|Chronograph|3330|18K pink gold|1938|50000|100000|N|N|N||black gilt square pushers
+74|Patek Philippe|Rectangular||yellow gold white gold|1940s|15000|30000|N|Y|Y||Bailey Banks Biddle signed
+75|Piaget|Bracelet Watch|3881D76|yellow gold lapis jasper|1970s|20000|40000|N|Y|N||jasper lapis bracelet
+76|Rolex|Datejust|16000|stainless steel|1983|4000|8000|N|N|Y||King Khalid Academy
+77|Rolex|Calatrava|2318|stainless steel|1930s|5000|10000|N|N|N||radium dial
+78|Patek Philippe|Tour Eiffel|2441|18K yellow gold|1950s|18000|36000|N|N|Y||Eiffel Tower case
+79|A. Lange & Sohne|1815 Chronograph Flyback|402.026|18K white gold|2013|40000|80000|N|Y|Y||flyback chronograph
+80|Vacheron Constantin|Enamel Cloisonne|4724|18K yellow gold|1951|500000|1000000|N|N|Y||Americas cloisonne enamel
+81|Piaget|Bracelet Watch|4131K51|18K yellow gold|1970s|7000|14000|N|N|N||Y Koyabu signed
+82|Patek Philippe|Chronograph|533|18K pink gold|1942|60000|120000|N|N|Y||pink on pink
+83|Gerald Genta|Perpetual Calendar|G2072.7|18K yellow gold|1990s|9000|18000|N|N|N||rhomboidal case
+84|Gerald Genta|Gefica Perpetual Calendar|G3053.8|18K yellow gold|1990s|12000|24000|N|N|N||coral turquoise dial
+85|Audemars Piguet|Lady Ellipse||white gold diamonds emeralds|2000s|15000|30000|N|N|N||pave emerald dial
+86|Audemars Piguet|Lady Ellipse||white gold diamonds|2000s|12000|24000|N|N|N||pave diamond dial
+87|Patek Philippe|Calatrava|570|platinum|1963|80000|160000|N|Y|Y||center seconds
+88|Blancpain|Villeret Ultra-Slim|0071|platinum||4000|8000|Y|N|N||number 35
+89|IWC|Pilot Doppelchronograph|3711|platinum|2000s|12000|24000|N|N|N||blue split-seconds
+90|Breguet|Chronograph Triple Calendar Moon Phase||stainless steel|1970|100000|200000|N|Y|Y||Gastellier provenance
+91|Patek Philippe|Bracelet Watch||18K yellow gold|1940s|5000|10000|N|Y|N||pebble bracelet
+92|Patek Philippe|Calatrava|3919|18K yellow gold|1990|6000|12000|Y|N|Y||Gubelin papers
+93|Chopard|Luna d'oro|2249|18K yellow gold|1990|8000|16000|Y|N|N||retrograde perpetual calendar
+94|Ebel|El Primero Chronograph|5134901|18K pink gold|1990s|4000|8000|Y|N|N||El Primero
+95|Patek Philippe|Bracelet Watch|4237-1|18K yellow gold|1970s|15000|30000|N|N|N||blue soleil dial
+96|Patek Philippe|Rectangular|2427|18K yellow gold|1950s|10000|20000|N|N|Y||papillon lugs
+97|Cartier|Tonneau CPCP|2435F|platinum|2010|8000|16000|N|N|Y||number 60
+98|Cartier|Tank Americaine|1726|white gold diamonds|1999|10000|20000|N|N|Y||diamond bezel
+99|Cartier|Tank Louis Jumbo|17002|18K yellow gold|1970s|7000|14000|N|N|Y||automatic Tank
+100|Patek Philippe|Nautilus|5711/1A-010|stainless steel|2018|100000|200000|N|N|Y||sealed Tiffany signed
+101|Audemars Piguet|Tank-Shaped||18K yellow gold|1950s|6000|12000|N|Y|N||Cartier signed dial
+102|Cartier|Ronde|7980|18K yellow gold|1970s|12000|24000|N|Y|N||guilloche dial
+103|Cartier|Tank Obus Savonette||18K yellow gold|1930s|50000|100000|N|Y|N||hinged hunter case
+104|Alex Huning|Asymmetric Bracelet|5523A|white gold diamonds|1970s|5000|10000|N|Y|N||blue dial
+105|Cartier|Mini Tank London||18K yellow gold|1976|6000|12000|N|Y|N||London made
+106|Patek Philippe|Calatrava|570|18K yellow gold|1943|30000|60000|N|Y|Y||Breguet numerals extract
+107|IWC|Ingenieur Chrono Alarm|3805/9515|18K white gold|1993|8000|16000|N|N|Y||Brunei Royal Court
+108|Rolex|Explorer II|1655|stainless steel|1978|12000|24000|N|N|Y||Freccione
+109|Rolex|Datejust|16220|stainless steel|1999|4000|8000|N|Y|Y||Saudi Armed Forces
+110|Rolex|Prince|971U|silver|1920s|8000|16000|N|N|N||black dial
+111|Rolex|Daytona|6265|stainless steel|1971|80000|160000|N|N|N||tropical brown dial
+112|Rolex|Datejust|1611|18K yellow gold|1975|10000|20000|N|N|N||florentine bezel
+113|A. Lange & Sohne|Lange 1|101.039|18K white gold|2010|15000|30000|N|N|Y||luminous dial
+114|Andersen Geneve|Christopher Columbus 500th Anniversary||platinum|1992|10000|20000|N|N|N||world time lacquer
+115|Longines|Calatrava|6119-6|stainless steel|1950s|5000|10000|N|N|N||oversized 37mm
+116|Audemars Piguet|Bracelet Watch||yellow gold white gold diamonds|1980s|4000|8000|Y|N|N||diamond bezel
+117|Rolex|Cellini|3585|18K yellow gold|1975|20000|40000|N|Y|N||Khanjar coral dial
+118|Cartier|Tank Lugless London||18K yellow gold|1964|12000|24000|N|N|N|John Goldberger Collection|cream patina dial
+119|Cartier|Tonneau|2456|white gold yellow diamonds|1990s|20000|40000|N|N|N||yellow diamond bezel
+120|Patek Philippe|Calatrava|1527|platinum|1948|60000|120000|N|N|Y||sector dial extract
+121|Patek Philippe|Chronograph Split-Seconds|5959|platinum|2007|200000|400000|N|N|Y||black Breguet numerals
+122|Breguet|Tradition Seconde Retrograde|7097|18K pink gold|2024|12000|24000|Y|N|Y||retrograde seconds
+123|Omega|Perpetual Calendar Prototype|055 ST 175.0035|stainless steel|1990s|6000|12000|Y|N|N||Anton Bally provenance
+124|Paul Picot|Atelier La Rattrapante|0100|18K yellow gold|2001|7000|14000|Y|N|Y||split-seconds calendar
+125|Rolex|Day-Date|118239|18K white gold|2021|30000|60000|N|N|Y||lapis diamond dial
+126|Audemars Piguet|Disco Volante|5093BC|18K white gold|1960s|15000|30000|N|Y|N||Gubelin signed
+127|Piaget|Altiplano|9200A6|white gold lapis|1971|6000|12000|Y|N|Y||lapis cufflinks
+128|Daniel Roth|Chronograph|2147|18K yellow gold|1990s|30000|60000|N|N|Y|Johnny Dorelli Collection|number 6
+129|Blancpain|Minute Repeater Perpetual Calendar|5335|18K yellow gold|1980s|25000|50000|N|N|Y|Johnny Dorelli Collection|number 37
+130|Cartier|Santos|829600|18K yellow gold|1980s|15000|30000|N|N|N||Royal Khanjar
+131|Cartier|Baignoire Allongee London||18K yellow gold|1968|80000|160000|N|N|N|John Goldberger Collection|London made
+132|Cartier|Ellipse||18K yellow gold|1980s|4000|8000|N|Y|N||black dial
+133|Cartier|Tank Americaine Jumbo|2505|18K pink gold|2010s|5000|10000|N|N|Y||guilloche dial
+134|Cartier|Tank Americaine Jumbo|1734|platinum|1995|8000|16000|N|N|Y||early platinum
+135|Breguet|Marine Hora Mundi|3700|18K yellow gold|2001|15000|30000|N|Y|Y||world time bracelet
+136|Piaget|Mini Polo|15201 C735|yellow gold diamonds|1990s|10000|20000|N|Y|N||diamond dial
+137|Breguet|Chronograph Perpetual Calendar|3617|18K yellow gold|1998|30000|60000|N|N|Y||guilloche dial
+138|Vacheron Constantin|Calatrava||18K yellow gold|1950s|7000|14000|N|N|N||oversized guilloche
+139|Audemars Piguet|Pocket Watch Perpetual Calendar||18K yellow gold|1920s|18000|36000|N|N|N||French import hallmarks
+140|Rolex|Datejust|16018|18K yellow gold|1986|15000|30000|N|Y|Y||Tiffany boiler gauge
+141|Patek Philippe|Chronograph Perpetual Calendar|3970E|18K yellow gold|1990|180000|360000|N|Y|Y||gold bracelet
+142|Cartier|Tank Louis Jumbo|17002|18K white gold|1970s|12000|24000|N|Y|Y||automatic Tank
+143|Patek Philippe|Calatrava|5119|18K white gold|2009|8000|16000|N|N|Y||hobnail bezel
+144|Cartier|Baignoire||18K yellow gold|1960s|4000|8000|Y|N|N||Paris dial
+145|Cartier|Pocket watch||yellow gold lacquer diamonds|1925|15000|30000|N|Y|Y||Locarno Briand provenance
+146|Cartier|Grande Octagonal London||18K yellow gold|1970|80000|160000|N|N|N|John Goldberger Collection|London made
+147|Patek Philippe|Gondolo||platinum|1928|15000|30000|N|N|Y||Tiffany signed
+148|Gerald Genta|Success Fantasy Mickey Mouse|G3260.7|18K yellow gold|1990s|10000|20000|N|N|N||mother of pearl
+149|Vacheron Constantin|Chronograph|4178|18K pink gold|1941|60000|120000|N|Y|Y||pulsations scale
+150|Piaget|Bracelet Watch|9862P65|yellow gold tiger eye|1970s|12000|24000|N|N|N||tiger eye bracelet
+151|Rolex|Pre-Daytona|6034|stainless steel|1951|140000|280000|N|Y|N||gradient tropical dial
+152|Universal Geneve|Bangle||18K pink gold|1950s|4000|8000|N|N|Y||original box
+153|Chopard|Happy Diamonds|4097|yellow gold diamonds|2020s|7000|14000|N|N|N||serpenti bracelet
+154|Richard Mille|RM 028 AK RG||pink gold titanium|2010s|70000|140000|N|N|Y||skeleton diver
+155|Cartier|Tortue CPCP|WGTA00008|platinum|2023|8000|16000|N|N|Y||limited 200 pieces
+156|Cartier|Tank London||platinum|1960s|25000|50000|N|N|N|John Goldberger Collection|London platinum
+157|Patek Philippe|Rectangular||white gold yellow gold|1930s|20000|40000|N|N|N||Hausmann signed
+158|Patek Philippe|Calatrava|541|18K pink gold|1939|20000|40000|N|N|Y||Freccero signed
+159|Patek Philippe|Chronograph Flyback Annual Calendar|5960|platinum|2014|40000|80000|N|N|Y||annual calendar
+160|Patek Philippe|Padellone|3450|18K yellow gold|1985|200000|400000|N|N|Y||leap year indicator
+161|Rolex|Cellini|4342|white gold diamonds|1976|20000|40000|N|N|Y||trapezoidal diamond bezel
+162|Rolex|Daytona|116589SALV|white gold red sapphires|2010|120000|240000|N|N|Y||meteorite sapphire bezel
+163|Rolex|Daytona|6239|stainless steel|1969|50000|100000|N|N|N||Pucci Papaleo archive
+164|Cartier|Tonneau|2712|white gold diamonds|2004|10000|20000|N|N|Y||diamond bezel
+165|Bulgari|Tubogas|G.1164-4|yellow gold white gold|1970s|20000|40000|N|N|N||two-tone Tubogas
+166|Piaget|Cuff Watch|9850D73|yellow gold coral|1970s|60000|120000|N|Y|N||coral cuff
+167|Eberhard & Co|Pre Extra-Fort Pocket Watch Chronograph||stainless steel|1940s|15000|30000|N|N|N||pair salmon dials
+168|Cartier|Tank Louis XL CPCP|2914|18K pink gold|2007|5000|10000|N|N|Y||number 124
+169|Bulgari|Tubogas|G.1211-4|18K yellow gold|1970s|15000|30000|N|N|N||Genta designed
+170|Blancpain|Perpetual Calendar|5395-3892A|yellow gold diamonds|1980s|10000|20000|Y|N|N||mother of pearl
+171|Vacheron Constantin|Jump Hour||18K white gold|1930|200000|400000|N|N|Y||only one known
+172|Vacheron Constantin|Oversized Calatrava||18K pink gold|1950s|10000|20000|N|N|N||38mm case
+173|Breguet|Type 20|5101/54|stainless steel|1960|30000|60000|N|N|Y||French Air Force
+174|Vacheron Constantin|Chronograph|4178|18K yellow gold|1952|15000|30000|N|N|Y||Certificate Authenticity
+175|Piaget|Bracelet Watch|92110D2|18K yellow gold|1970s|10000|20000|N|Y|N||Van Cleef signed
+176|Schwarz Etienne x Kari Voutilainen|Roma Synergy||stainless steel|2001|15000|30000|N|Y|Y||number 38 of 50
+177|Ulysse Nardin|Jaquemarts Minute Repeater|701-22|18K white gold|1992|30000|60000|N|N|Y||blue enamel automaton
+178|Cartier|Tank Cintree London||18K yellow gold|1975|70000|140000|N|N|N|John Goldberger Collection|London made
+179|Cartier|Santos Carree|2960|18K yellow gold|1980s|20000|40000|N|Y|N||diamond markers
+180|Rolex|Day-Date|18078|yellow gold diamonds|1982|20000|40000|N|N|N||ammonite Explorer dial
+181|Patek Philippe|Perpetual Calendar Minute Repeater|3974|18K yellow gold|1990|600000|1200000|N|N|Y||Hagmann case
+182|Rolex|Datejust|16018|18K yellow gold|1987|25000|50000|N|N|N||malachite dial
+183|Audemars Piguet|Carnegie||yellow gold diamonds rubies|1990s|10000|20000|N|N|N||pearls rubies diamonds
+184|Rolex|Day-Date|18039|18K white gold|1981|12000|24000|N|N|N||blue Jubilee dial
+185|Chopard|Lady Cuff||18K yellow gold|1980s|20000|40000|N|N|N||jade dial
+186|Audemars Piguet|Royal Oak|5402|stainless steel|1972|40000|80000|N|N|Y||A-100 first batch
+187|Movado|Gold Leaf||18K yellow gold|1960s|8000|16000|N|N|N||concealed dial
+188|Patek Philippe|Pocket Watch||platinum pink gold|1930s|4000|8000|N|Y|Y||Raymond Yard signed
+189|Omega|Tubogas||18K yellow gold|1975|5000|10000|N|N|N||Weingrill bracelet
+190|Piaget|Coin Al Saud||18K pink gold|1970s|7000|14000|N|N|N||King Faisal emblem
+191|Rolex|GMT-Master|6542|stainless steel|1955|120000|240000|N|N|N||Bakelite red GMT
+192|Cartier|Tank Basculante Millennium CPCP|2391|18K yellow gold|1999|8000|16000|N|N|Y||number 184 of 365
+193|Audemars Piguet|Royal Oak Chronograph Kasparov|25860|stainless steel|2000s|20000|40000|N|N|Y||black Tapisserie
+194|Cartier|Tank Cintree Milano Edition|WGTA0284|platinum|2024|40000|80000|N|N|Y||Milan limited edition
+195|Rolex|Chronograph Barilotto|3525|18K yellow gold|1939|30000|60000|N|N|N||champagne dial
+196|Patek Philippe|Calatrava|3454|18K yellow gold|1962|40000|80000|N|N|Y||fluted bezel
+197|Patek Philippe|Calatrava|3429|platinum|1962|25000|50000|N|Y|Y||rare platinum
+198|Rolex|GMT Master|1675|18K yellow gold|1978|12000|24000|N|N|N||nipple dial
+199|Rolex|Oysterquartz Day-Date|19148|yellow gold diamonds|1981|40000|80000|N|N|N||two tone woods
+200|Rolex|Daytona|16520|stainless steel|1998|150000|300000|N|N|N||salmon Arabic dial
+201|Jaeger-LeCoultre|Bracelet Watch||18K yellow gold|1950s|6000|12000|N|N|N||patinated dial
+202|Piaget|Bracelet Watch|97810D2|white gold sapphires|1980s|12000|24000|N|N|N||mother of pearl
+203|Rolex|Submariner|16618|18K yellow gold|1991|15000|30000|N|N|N||Serti dial
+204|Rolex|Milgauss|1019|stainless steel|1970|12000|24000|N|Y|Y||CERN dial
+205|Rolex|Oyster Perpetual Bubbleback|2940|stainless steel|1945|6000|12000|N|Y|N||Verga signed salmon
+206|Rolex|Day-Date|18108|yellow gold diamonds|1985|14000|28000|N|N|N||bark wood dial
+207|Rolex|Day-Date|118238|18K yellow gold|2002|40000|80000|N|N|Y||ferrite dial
+208|Audemars Piguet|Triple Calendar Moon Phase||platinum|1927|200000|400000|N|N|N||Importe de Suisse
+209|Rolex|Empire|3548|18K pink gold|1940s|8000|16000|N|N|N||pink Roman dial
+210|Rolex|Chronograph|2811|stainless steel|1938|15000|30000|N|N|Y||patinated radium dial
+211|Patek Philippe|Marilyn Monroe|2442|18K pink gold|1953|50000|100000|N|N|Y||flared case
+212|Rolex|Daytona|6239|stainless steel|1963|70000|140000|N|N|Y||double Swiss dial
+213|Piaget|Dual Time|69212A57|18K white gold|1970s|20000|40000|N|Y|N||dual lapis dials
+214|Cartier|Baignoire London||18K yellow gold|1971|12000|24000|N|N|N|John Goldberger Collection|dual hallmarks
+215|Patek Philippe|Perpetual Calendar Moon Phase|3940|18K yellow gold|1986|150000|300000|N|Y|Y||Beyer signed first series
+216|Vacheron Constantin x Bulgari|Serpenti||18K pink gold|1970s|20000|40000|N|N|Y||Bulgari bracelet
+217|Patek Philippe|Nautilus|5719|white gold diamonds|2008|180000|360000|N|Y|Y||full diamond set
+218|Gerald Genta|Octagonal|G3006|18K yellow gold|1980s|30000|60000|N|N|N||repeater perpetual pocket
+219|Audemars Piguet|Lady Knot||gold sapphires diamonds|1960s|25000|50000|N|Y|N||gem-set knot bracelet
+220|Rolex|Sea-Dweller|1665|stainless steel|1973|250000|500000|N|N|N||Qaboos red dial
+221|Blancpain|Villeret Skeleton||18K yellow gold|1990s|5000|10000|N|N|Y|Johnny Dorelli Collection|number 9
+222|Rolex|Prince Elegant||18K pink gold|1930s|7000|14000|N|N|N||Linzeler case
+223|Parmigiani Fleurier|Toric Minute Repeater GMT|PF008520|platinum diamonds|2004|60000|120000|N|Y|Y||diamond bezel
+224|Cartier|Nain Jaune||platinum diamonds onyx|1930s|30000|60000|N|N|N||Art Deco star case
+225|Cartier|Tank Cintree Reedition|WGTA0193|platinum|2024|20000|40000|N|N|Y||number 10 of 150
+226|Patek Philippe|Carree|1410|18K pink gold|1939|8000|16000|N|Y|Y||pink dial hooded lugs
+227|Patek Philippe|Nautilus|3700/1|stainless steel|1981|130000|260000|N|N|Y||Tiffany signed
+228|Patek Philippe|Ladies Watch|4555/2|yellow gold diamonds|1983|60000|120000|N|Y|Y||lapis diamond dial
+229|Rolex|Daytona|6265|18K yellow gold|1984|80000|160000|N|N|N||champagne black counters
+230|Rolex|Land-Dweller|127335|18K pink gold|2025|40000|80000|N|N|Y||honeycomb dial
+231|Rolex|Day-Date|18048|yellow gold diamonds|1984|20000|40000|N|N|Y||Pleiades dial
+232|Rolex|Day-Date|18048|yellow gold diamonds|1982|35000|70000|N|N|Y||onyx pyramidal dial
+233|Patek Philippe|Tasti Tondi|1463|18K pink gold|1949|180000|360000|N|N|Y||pink gold bracelet
+234|Patek Philippe|Chronograph Perpetual Calendar|2499/100|18K yellow gold|1982|700000|1400000|N|N|Y||first in-house 2499 case`;
+const fmt=n=>n==null?'-':'EUR '+Math.round(n).toLocaleString('it-IT');
+const short=n=>n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?Math.round(n/1e3)+'k':n;
+const rx=(s,r)=>r.test(s);
+const L=RAW.split('\n').map(l=>{const p=l.split('|');const lot=+p[0],low=+p[6],high=+p[7];
+ let y=p[5]||'';let yr=null;if(/^\d{4}$/.test(y))yr=+y;else if(/^\d{4}s$/.test(y))yr=+y.slice(0,4)+5;
+ const era=yr==null?'n/d':yr<1940?'Pre-1940':yr<1960?'1940-59':yr<1980?'1960-79':yr<2000?'1980-99':'2000+';
+ const mat=/platinum/i.test(p[4])?'Platino':/stainless|^steel/i.test(p[4])?'Acciaio':/pink/i.test(p[4])?'Oro rosa':/white/i.test(p[4])?'Oro bianco':/yellow/i.test(p[4])?'Oro giallo':/silver/i.test(p[4])?'Argento':'Altro/misto';
+ const t=(p[1]+' '+p[2]+' '+p[12]).toLowerCase();const d=[];
+ if(p[8]=='Y')d.push('No Reserve');
+ if(p[10]=='Y')d.push('Full set / documenti');
+ if(p[11])d.push('Provenienza collezione');
+ if(/royal|khanjar|saudi|brunei|qaboos|faisal|king khalid|air force|armed|cern|arab watch/.test(t))d.push('Provenienza speciale/Medio Oriente');
+ if(/daytona|nautilus|royal oak|day-date|gmt|sea-dweller|explorer|submariner|milgauss|santos|tank|tubogas/.test(t))d.push('Modello icona');
+ if(/perpetual|repeater|split|rattrapante|chronograph|tourbillon|world time|hora mundi|calendar|moon|jump hour|retrograde|pulsations|jaquemarts|dual time/.test(t))d.push('Complicazione');
+ if(/enamel|cloisonn|lapis|malachite|coral|tiger|jade|mother|onyx|mosaic|wood|bark|meteorite|ferrite|ammonite|jasper|tropical|patina|salmon|paul newman|big red|turquoise|ruby|emerald/.test(t))d.push('Quadrante speciale');
+ if(/limited|number \d|n\. ?\d|of \d|no\. 1|only one|unique|first|prototype|a-100|sealed/.test(t))d.push('Edizione limitata/unica');
+ if(/tiffany|gubelin|bulgari signed|van cleef|cartier signed|signed|beyer|retail/.test(t))d.push('Doppia firma / retailer');
+ if(/diamond|pave|sapphire|ruby|emerald/.test(p[4]+' '+t))d.push('Gemme');
+ if(p[9]=='Y')d.push('IVA import 20%');
+ return {lot,brand:p[1],model:p[2],ref:p[3],mat,matRaw:p[4],year:y,yr,era,low,high,mid:(low+high)/2,nr:p[8]=='Y',vat:p[9]=='Y',bp:p[10]=='Y',prov:p[11],note:p[12],d,ses:lot<=121?1:2}});
+const $=id=>document.getElementById(id);
+const sum=a=>a.reduce((x,y)=>x+y,0);
+const group=(a,f)=>{const m={};a.forEach(x=>{const k=f(x);(m[k]=m[k]||[]).push(x)});return m};
+const COL=['#c9a45c','#4f8fd9','#4fbf8b','#e5645f','#9b7fd6','#e0a458','#5bc0be','#d96fa5','#8fb35b','#7c8aa6','#c78a6b','#6aa5d6','#b0b36b','#a06fd0','#d6c24f'];
+Chart.defaults.color='#8b94a7';Chart.defaults.borderColor='#2a3140';
+const mk=(id,type,labels,data,opt={})=>new Chart($(id),{type,data:{labels,datasets:[{data,backgroundColor:type=='bar'?'#c9a45c':COL,borderColor:'#181d27',borderWidth:type=='bar'?0:2}]},options:Object.assign({indexAxis:opt.h?'y':'x',plugins:{legend:{display:type!='bar',position:'right'}},maintainAspectRatio:true},opt.o||{})});
+// nav
+const tabs=['Panoramica','Tutti i lotti','Driver d\'acquisto','Opportunita / No Reserve','Confronto mercato','Info & note'];
+tabs.forEach((t,i)=>{const b=document.createElement('button');b.textContent=t;if(!i)b.className='on';b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));$('t'+i).classList.add('on')};$('nav').appendChild(b)});
+// KPIs
+const tl=sum(L.map(x=>x.low)),th=sum(L.map(x=>x.high)),med=[...L].map(x=>x.mid).sort((a,b)=>a-b);
+const brands=group(L,x=>x.brand);
+const kp=(v,l)=>`<div class="kpi"><span>${l}</span><b>${v}</b></div>`;
+$('kpis').innerHTML=kp(L.length,'Lotti totali')+kp(Object.keys(brands).length,'Marchi')+kp(fmt(tl),'Totale stime basse')+kp(fmt(th),'Totale stime alte')+kp(fmt(med[Math.floor(med.length/2)]),'Mid-stima mediana')+kp(L.filter(x=>x.nr).length,'Lotti No Reserve')+kp(L.filter(x=>x.mid>=100000).length,'Lotti con mid ≥ 100k')+kp(L.filter(x=>x.prov).length,'Lotti da collezioni');
+const bs=Object.entries(brands).map(([k,v])=>[k,v.length,sum(v.map(x=>x.mid))]).sort((a,b)=>b[1]-a[1]).slice(0,15);
+mk('c1','bar',bs.map(x=>x[0]),bs.map(x=>x[1]),{h:1});
+const bv=[...bs].sort((a,b)=>b[2]-a[2]);mk('c2','bar',bv.map(x=>x[0]),bv.map(x=>x[2]),{h:1});
+const bands=[['<10k',0,1e4],['10-20k',1e4,2e4],['20-50k',2e4,5e4],['50-100k',5e4,1e5],['100-250k',1e5,2.5e5],['250k-1M',2.5e5,1e6],['>1M',1e6,1e12]];
+mk('c3','bar',bands.map(b=>b[0]),bands.map(b=>L.filter(x=>x.mid>=b[1]&&x.mid<b[2]).length));
+const ms=Object.entries(group(L,x=>x.mat)).map(([k,v])=>[k,v.length]);mk('c4','doughnut',ms.map(x=>x[0]),ms.map(x=>x[1]));
+const eras=['Pre-1940','1940-59','1960-79','1980-99','2000+','n/d'];const eg=group(L,x=>x.era);
+mk('c5','bar',eras,eras.map(e=>(eg[e]||[]).length));
+mk('c6','bar',eras,eras.map(e=>(eg[e]||[]).length?Math.round(sum(eg[e].map(x=>x.mid))/eg[e].length):0));
+function tableTop(arr,id){$(id).innerHTML='<div class="wrap" style="max-height:none"><table><tr><th>Lotto</th><th>Marchio</th><th>Modello</th><th>Ref</th><th>Anno</th><th>Materiale</th><th class="num">Stima bassa</th><th class="num">Stima alta</th><th>Driver</th></tr>'+arr.map(x=>`<tr><td>${x.lot}</td><td>${x.brand}</td><td>${x.model}</td><td>${x.ref}</td><td>${x.year}</td><td>${x.mat}</td><td class="num">${fmt(x.low)}</td><td class="num">${fmt(x.high)}</td><td>${tg(x)}</td></tr>`).join('')+'</table></div>'}
+function tg(x){return x.d.map(k=>`<span class="tag ${k=='No Reserve'||k.startsWith('Full')?'g':k.startsWith('IVA')?'r':k.startsWith('Prov')?'y':''}">${k}</span>`).join('')}
+tableTop([...L].sort((a,b)=>b.mid-a.mid).slice(0,15),'top');
+// lots table
+const uniq=(a)=>[...new Set(a)].sort();
+uniq(L.map(x=>x.brand)).forEach(b=>{$('fb').add(new Option(b,b));$('fb2').add(new Option(b,b))});
+uniq(L.map(x=>x.mat)).forEach(b=>$('fm').add(new Option(b,b)));
+uniq(L.flatMap(x=>x.d)).forEach(b=>$('fd').add(new Option(b,b)));
+let sk='lot',sd=1;
+const cols=[['lot','Lotto'],['ses','Sess.'],['brand','Marchio'],['model','Modello'],['ref','Ref'],['year','Anno'],['mat','Materiale'],['low','Stima bassa'],['high','Stima alta'],['mid','Mid'],['allin','All-in (stima alta + premio)'],['d','Driver / note']];
+function render(){const q=$('q').value.toLowerCase(),pr=+$('prem').value/100;
+ let a=L.filter(x=>(!q||(x.brand+x.model+x.ref+x.note+x.prov+x.matRaw).toLowerCase().includes(q))&&(!$('fb').value||x.brand==$('fb').value)&&(!$('fm').value||x.mat==$('fm').value)&&(!$('fs').value||x.ses==$('fs').value)&&(!$('fd').value||x.d.includes($('fd').value))&&(!$('pmin').value||x.mid>=+$('pmin').value)&&(!$('pmax').value||x.mid<=+$('pmax').value));
+ a.sort((x,y)=>{const u=x[sk==='allin'?'high':sk],v=y[sk==='allin'?'high':sk];return (u>v?1:u<v?-1:0)*sd});
+ $('cnt').textContent=a.length+' lotti | mid totale '+fmt(sum(a.map(x=>x.mid)));
+ $('tb').innerHTML='<tr>'+cols.map(c=>`<th onclick="sortBy('${c[0]}')">${c[1]}</th>`).join('')+'</tr>'+a.map(x=>`<tr><td>${x.lot}</td><td>${x.ses}</td><td>${x.brand}</td><td>${x.model}${x.prov?'<br><span class="tag y">'+x.prov+'</span>':''}</td><td>${x.ref}</td><td>${x.year}</td><td>${x.matRaw}</td><td class="num">${fmt(x.low)}</td><td class="num">${fmt(x.high)}</td><td class="num">${fmt(x.mid)}</td><td class="num">${fmt(x.high*(1+pr)*(x.vat?1.2:1))}</td><td>${x.note}<br>${tg(x)}</td></tr>`).join('')}
+window.sortBy=k=>{sd=sk==k?-sd:1;sk=k;render()};
+['q','fb','fm','fs','fd','pmin','pmax','prem'].forEach(i=>$(i).oninput=render);render();
+// drivers
+const dn=uniq(L.flatMap(x=>x.d));const dc=dn.map(k=>[k,L.filter(x=>x.d.includes(k))]).sort((a,b)=>b[1].length-a[1].length);
+$('dk').innerHTML=dc.slice(0,6).map(([k,v])=>kp(v.length,k)).join('');
+mk('d1','bar',dc.map(x=>x[0]),dc.map(x=>x[1].length),{h:1});
+mk('d2','bar',dc.map(x=>x[0]),dc.map(x=>Math.round(sum(x[1].map(y=>y.mid))/x[1].length)),{h:1});
+const wb=L.filter(x=>x.bp),nb=L.filter(x=>!x.bp);
+mk('d3','bar',['Con scatola/documenti','Senza'],[Math.round(sum(wb.map(x=>x.mid))/wb.length),Math.round(sum(nb.map(x=>x.mid))/nb.length)]);
+const pg=group(L.filter(x=>x.prov),x=>x.prov);const pe=Object.entries(pg);
+mk('d4','doughnut',pe.map(x=>x[0]),pe.map(x=>x[1].length));
+// opportunities
+const nrs=L.filter(x=>x.nr);$('sk').innerHTML=kp(nrs.length,'Lotti No Reserve')+kp(fmt(sum(nrs.map(x=>x.low))),'Stime basse NR')+kp(nrs.filter(x=>x.bp).length,'NR con documenti')+kp(L.filter(x=>x.low<=8000).length,'Lotti con stima bassa ≤ 8k')+kp(L.filter(x=>x.ses==1).length,'Lotti Sessione 1')+kp(L.filter(x=>x.ses==2).length,'Lotti Sessione 2');
+const nb2=Object.entries(group(nrs,x=>x.brand)).map(([k,v])=>[k,v.length]).sort((a,b)=>b[1]-a[1]);mk('s1','bar',nb2.map(x=>x[0]),nb2.map(x=>x[1]),{h:1});
+mk('s2','bar',['Sessione 1 (1-121)','Sessione 2 (122-234)'],[1,2].map(s=>sum(L.filter(x=>x.ses==s).map(x=>x.mid))));
+tableTop([...L].filter(x=>x.nr||(x.bp&&x.low<=10000)).sort((a,b)=>a.low-b.low),'short');
+// comparison
+const store=JSON.parse(localStorage.getItem('mkt')||'{}');
+function rc(){const q=$('q2').value.toLowerCase(),b=$('fb2').value;
+ const a=L.filter(x=>(!q||(x.brand+x.model+x.ref).toLowerCase().includes(q))&&(!b||x.brand==b));
+ $('cmp').innerHTML='<tr><th>Lotto</th><th>Orologio</th><th class="num">Mid stima</th><th>Cerca</th><th>Chrono24 EUR</th><th>EveryWatch EUR</th><th class="num">Scarto vs mercato</th></tr>'+a.map(x=>{const s=store[x.lot]||{};const ref=s.e||s.c;const dl=ref?(x.mid/ref-1)*100:null;const qs=encodeURIComponent(x.brand+' '+x.model+' '+x.ref);
+ return `<tr><td>${x.lot}</td><td>${x.brand} ${x.model} ${x.ref} (${x.year})</td><td class="num">${fmt(x.mid)}</td><td><a target="_blank" href="https://www.chrono24.it/search/index.htm?query=${qs}">Chrono24</a> | <a target="_blank" href="https://everywatch.com/search?q=${qs}">EveryWatch</a></td><td><input class="m" type="number" value="${s.c||''}" onchange="sv(${x.lot},'c',this.value)"></td><td><input class="m" type="number" value="${s.e||''}" onchange="sv(${x.lot},'e',this.value)"></td><td class="num ${dl==null?'':dl<=0?'pos':'neg'}">${dl==null?'-':dl.toFixed(0)+'%'}</td></tr>`}).join('');
+ const f=L.filter(x=>store[x.lot]&&(store[x.lot].e||store[x.lot].c));$('cmpsum').textContent=f.length+' lotti confrontati';
+ if(window.cch)cch.destroy();window.cch=new Chart($('cc'),{type:'bar',data:{labels:f.map(x=>'Lotto '+x.lot),datasets:[{label:'Mid stima',data:f.map(x=>x.mid),backgroundColor:'#c9a45c'},{label:'Mercato',data:f.map(x=>store[x.lot].e||store[x.lot].c),backgroundColor:'#4f8fd9'}]}})}
+window.sv=(l,k,v)=>{store[l]=store[l]||{};store[l][k]=+v||0;localStorage.setItem('mkt',JSON.stringify(store));rc()};
+window.exportCSV=()=>{const r=['lotto,marchio,modello,ref,anno,low,high,mid,chrono24,everywatch'].concat(L.map(x=>{const s=store[x.lot]||{};return [x.lot,x.brand,'"'+x.model+'"',x.ref,x.year,x.low,x.high,x.mid,s.c||'',s.e||''].join(',')}));const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([r.join('\n')],{type:'text/csv'}));a.download='lotti_monaco_legend.csv';a.click()};
+['q2','fb2'].forEach(i=>$(i).oninput=rc);rc();
+</script></body></html>

@@ -25,6 +25,7 @@ th{position:sticky;top:50px;background:#121722;color:var(--gold);cursor:pointer;
 .wrap{overflow:auto;max-height:78vh;border:1px solid var(--line);border-radius:12px}
 a{color:var(--gold)}input.m{width:90px;background:#10141c;border:1px solid var(--line);color:var(--tx);padding:4px;border-radius:6px;text-align:right}
 .pos{color:var(--ok)}.neg{color:var(--bad)}
+.lk{color:var(--gold);text-decoration:none;font-weight:600}.lk:hover{text-decoration:underline}.rel{position:relative}
 </style></head><body>
 <header><h1>Monaco Legend Group - Exclusive Timepieces</h1>
 <p>Hotel Meridien Beach Plaza, Monaco | Sessione 1: 31 ott 2026, lotti 1-121 | Sessione 2: 1 nov 2026, lotti 122-234 | Anteprima 29 ott-1 nov | Dati estratti dal catalogo PDF (stime in EUR)</p></header>
@@ -33,14 +34,18 @@ a{color:var(--gold)}input.m{width:90px;background:#10141c;border:1px solid var(-
 <section class="tab on" id="t0">
 <div class="kpis" id="kpis"></div>
 <div class="grid">
-<div class="card"><h3>Lotti per marchio (Top 15)</h3><canvas id="c1"></canvas></div>
-<div class="card"><h3>Valore stimato (mid) per marchio - Top 15, EUR</h3><canvas id="c2"></canvas></div>
+<div class="card"><h3>Lotti per marchio (tutti i marchi in asta)</h3><div class="rel" id="w1"><canvas id="c1" style="max-height:none"></canvas></div></div>
+<div class="card"><h3>Valore stimato (mid) per marchio - tutti i marchi, EUR</h3><div class="rel" id="w2"><canvas id="c2" style="max-height:none"></canvas></div></div>
 <div class="card"><h3>Distribuzione lotti per fascia di stima (mid)</h3><canvas id="c3"></canvas></div>
 <div class="card"><h3>Materiale della cassa</h3><canvas id="c4"></canvas></div>
 <div class="card"><h3>Lotti per epoca</h3><canvas id="c5"></canvas></div>
 <div class="card"><h3>Mid-stima media per epoca (EUR)</h3><canvas id="c6"></canvas></div>
+<div class="card"><h3>Distribuzione per complicazione (n. lotti)</h3><canvas id="k1"></canvas></div>
+<div class="card"><h3>Valore mid totale per complicazione (EUR)</h3><canvas id="k2"></canvas></div>
+<div class="card"><h3>Mid-stima media per complicazione (EUR)</h3><canvas id="k3"></canvas></div>
+<div class="card"><h3>Complicazione per marchio (Top 10 marchi per n. lotti)</h3><canvas id="k4"></canvas></div>
 </div>
-<div class="card"><h3>Top 15 lotti per stima</h3><div id="top"></div></div>
+<div class="card"><h3>Top 30 lotti per stima</h3><div id="top"></div></div>
 </section>
 
 <section class="tab" id="t1">
@@ -50,12 +55,13 @@ a{color:var(--gold)}input.m{width:90px;background:#10141c;border:1px solid var(-
 <select id="fm"><option value="">Tutti i materiali</option></select>
 <select id="fs"><option value="">Tutte le sessioni</option><option>1</option><option>2</option></select>
 <select id="fd"><option value="">Tutti i driver</option></select>
+<select id="fk"><option value="">Tutte le complicazioni</option></select>
 <input id="pmin" type="number" placeholder="Stima min EUR" style="width:130px"><input id="pmax" type="number" placeholder="Stima max EUR" style="width:130px">
 <label style="font-size:13px;color:var(--mut)">Premio d'asta % <input id="prem" type="number" value="0" style="width:60px"></label>
 <span id="cnt" style="color:var(--mut);font-size:13px"></span>
 </div>
 <div class="wrap"><table id="tb"></table></div>
-<p class="note">Clic sulle intestazioni per ordinare. Il premio d'asta non e indicato nel catalogo estratto: inserisci quello delle condizioni di vendita per vedere il costo all-in stimato (stima + premio). Nota IVA: i lotti con asterisco hanno 20% di IVA all'import sul prezzo finale se consegnati in UE.</p>
+<p class="note">Clic sulle intestazioni per ordinare; il numero di lotto apre la pagina del lotto sul sito Monaco Legend Auctions. Il premio d'asta non e indicato nel catalogo estratto: inserisci quello delle condizioni di vendita per vedere il costo all-in stimato (stima + premio). Nota IVA: i lotti con asterisco hanno 20% di IVA all'import sul prezzo finale se consegnati in UE.</p>
 </section>
 
 <section class="tab" id="t2">
@@ -66,7 +72,7 @@ a{color:var(--gold)}input.m{width:90px;background:#10141c;border:1px solid var(-
 <div class="card"><h3>Stima mid: con vs senza scatola/documenti</h3><canvas id="d3"></canvas></div>
 <div class="card"><h3>Provenienza / collezioni</h3><canvas id="d4"></canvas></div>
 </div>
-<div class="card"><h3>Come leggere i driver</h3><p class="note">I driver sono derivati dal testo del catalogo (modello, note, accessori). <b>Icona</b>: Daytona, Nautilus, Royal Oak, Day-Date, GMT, Sea-Dweller, Explorer, Submariner, Milgauss. <b>Complicazione</b>: calendario perpetuo, ripetizione minuti, rattrapante, cronografo, tourbillon, ora universale. <b>Quadrante speciale</b>: smalto/cloisonne, pietre dure (lapislazzuli, malachite, corallo, occhio di tigre, giada), tropical, patina, gemma. <b>Edizione limitata</b>: serie numerate. <b>Provenienza</b>: collezioni Madhvani, Goldberger, Dorelli, emblemi reali/militari. <b>No Reserve</b>: venduto senza prezzo di riserva (opportunita di entrata). <b>Full set</b>: scatola/garanzia/estratto d'archivio. <b>Doppia firma</b>: retailer (Tiffany, Gubelin, Cartier su AP...).</p></div>
+<div class="card"><h3>Come leggere i driver</h3><p class="note">I driver sono derivati dal testo del catalogo (modello, note, accessori). <b>Icona</b>: Daytona, Nautilus, Royal Oak, Day-Date, GMT, Sea-Dweller, Explorer, Submariner, Milgauss. <b>Complicazione</b>: calendario perpetuo, ripetizione minuti, rattrapante, cronografo, tourbillon, ora universale. <b>Quadrante speciale</b>: smalto/cloisonne, pietre dure (lapislazzuli, malachite, corallo, occhio di tigre, giada), tropical, patina, gemma. <b>Edizione limitata</b>: serie numerate. <b>Provenienza</b>: collezioni Madhvani, Goldberger, Dorelli, emblemi reali/militari. <b>No Reserve</b>: venduto senza prezzo di riserva (opportunita di entrata). <b>Full set</b>: scatola/garanzia/estratto d'archivio. <b>Doppia firma</b>: retailer (Tiffany, Gubelin, Cartier su AP...). <b>Classificazione complicazione</b> (colonna dedicata): Solo tempo, Cronografo, Calendario perpetuo, Cronografo + perpetuo, Altre complicazioni (ripetizione, tourbillon, ora universale, GMT, calendario triplo, ecc.).</p></div>
 </section>
 
 <section class="tab" id="t3">
@@ -79,12 +85,14 @@ a{color:var(--gold)}input.m{width:90px;background:#10141c;border:1px solid var(-
 </section>
 
 <section class="tab" id="t4">
-<div class="card"><h3>Confronto con mercato (EveryWatch / Chrono24)</h3>
-<p class="note">Questi portali richiedono abbonamento/login e non sono interrogabili in automatico: i prezzi di riferimento <b>non sono inclusi per non inventare dati</b>. Per ogni lotto trovi i link di ricerca pre-compilati; inserisci il prezzo di mercato (EUR) e la dashboard calcola lo scarto rispetto alla stima. I valori restano salvati nel tuo browser (localStorage) e puoi esportarli in CSV.</p>
+<div class="card"><h3>Confronto con mercato (Chrono24 / EveryWatch / WatchCharts)</h3>
+<p class="note">Le colonne Chrono24, EveryWatch e WatchCharts contengono i prezzi di mercato in EUR; la <b>Media mercato</b> e la media delle fonti compilate. Ho precompilato solo cio che ho trovato in fonti pubbliche (ora: annunci Chrono24 per le ref. 18038, 16018, 1655, 1611, 6265, 6239 Paul Newman, 1019, 16618, 1803, 3800/1 e 5402, convertiti da USD con il cambio qui sotto; sono prezzi richiesti, non venduti, e per alcune ref. si basa su 1-3 annunci: passa il mouse sul campo per vedere la fonte). Il resto va inserito a mano o importato da CSV: questi portali richiedono login/abbonamento e non sono interrogabili in automatico, quindi non ho inventato valori. Per ogni lotto trovi i link di ricerca; i valori restano nel tuo browser (localStorage) e si esportano in CSV.</p>
 <div class="filters"><input id="q2" placeholder="Cerca lotto..."><select id="fb2"><option value="">Tutti i marchi</option></select>
+<label class="note">Cambio USD→EUR <input id="fx" type="number" step="0.01" value="0.90" style="width:70px"></label>
+<label class="note">Importa CSV (lotto,chrono24,everywatch,watchcharts in EUR) <input type="file" id="imp" accept=".csv"></label>
 <button onclick="exportCSV()" style="background:var(--gold);border:0;padding:8px 14px;border-radius:8px;cursor:pointer">Esporta CSV</button><span id="cmpsum" style="color:var(--mut);font-size:13px"></span></div>
 <div class="wrap"><table id="cmp"></table></div></div>
-<div class="card" style="margin-top:16px"><h3>Scarto stima vs mercato (lotti compilati)</h3><canvas id="cc"></canvas></div>
+<div class="card" style="margin-top:16px"><h3>Mid stima vs media mercato (lotti compilati)</h3><canvas id="cc"></canvas></div>
 </section>
 
 <section class="tab" id="t5">
@@ -97,7 +105,7 @@ a{color:var(--gold)}input.m{width:90px;background:#10141c;border:1px solid var(-
 <li><b>Sito / contatti:</b> www.monacolegendauctions.com | info@monacolegendgroup.com | +377 97 77 53 35</li>
 <li><b>Collezioni speciali:</b> Roni Madhvani (Cartier, Patek, Vacheron; lotti 54-57 e altri), John Goldberger (Cartier London, lotti 50, 118, 131, 146, 156, 178, 214), Johnny Dorelli (Blancpain, IWC, Daniel Roth, Breguet).</li>
 <li><b>Contesto di mercato (lettera del Chairman):</b> pochi giorni prima, quattro Rolex Daytona hanno totalizzato circa 50 milioni di USD in asta; crescente interesse per orologi da tasca, Art Nouveau/Art Deco e design vintage; attenzione a rarita, originalita, provenienza e condizione.</li>
-<li><b>Cautele:</b> stime e dati sono estratti automaticamente dal PDF via OCR: verifica sempre sul catalogo ufficiale prima di offrire. I lotti dove il catalogo non riportava la ref sono lasciati vuoti.</li>
+<li><b>Cautele:</b> stime e dati sono estratti automaticamente dal PDF via OCR: verifica sempre sul catalogo ufficiale prima di offrire. I lotti dove il catalogo non riportava la ref sono lasciati vuoti. I link ai lotti seguono lo schema del sito (auction/exclusive-timepieces-43/lot-N).</li>
 </ul></div>
 </section>
 </main>
@@ -337,8 +345,6 @@ const RAW=`1|Ulysse Nardin|Split Seconds Chronograph||18K yellow gold|1990s|8000
 233|Patek Philippe|Tasti Tondi|1463|18K pink gold|1949|180000|360000|N|N|Y||pink gold bracelet
 234|Patek Philippe|Chronograph Perpetual Calendar|2499/100|18K yellow gold|1982|700000|1400000|N|N|Y||first in-house 2499 case`;
 const fmt=n=>n==null?'-':'EUR '+Math.round(n).toLocaleString('it-IT');
-const short=n=>n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?Math.round(n/1e3)+'k':n;
-const rx=(s,r)=>r.test(s);
 const L=RAW.split('\n').map(l=>{const p=l.split('|');const lot=+p[0],low=+p[6],high=+p[7];
  let y=p[5]||'';let yr=null;if(/^\d{4}$/.test(y))yr=+y;else if(/^\d{4}s$/.test(y))yr=+y.slice(0,4)+5;
  const era=yr==null?'n/d':yr<1940?'Pre-1940':yr<1960?'1940-59':yr<1980?'1960-79':yr<2000?'1980-99':'2000+';
@@ -355,13 +361,16 @@ const L=RAW.split('\n').map(l=>{const p=l.split('|');const lot=+p[0],low=+p[6],h
  if(/tiffany|gubelin|bulgari signed|van cleef|cartier signed|signed|beyer|retail/.test(t))d.push('Doppia firma / retailer');
  if(/diamond|pave|sapphire|ruby|emerald/.test(p[4]+' '+t))d.push('Gemme');
  if(p[9]=='Y')d.push('IVA import 20%');
- return {lot,brand:p[1],model:p[2],ref:p[3],mat,matRaw:p[4],year:y,yr,era,low,high,mid:(low+high)/2,nr:p[8]=='Y',vat:p[9]=='Y',bp:p[10]=='Y',prov:p[11],note:p[12],d,ses:lot<=121?1:2}});
+ const hasP=/perpetual/.test(t),hasC=/chronograph|rattrapante|split|daytona|el primero|type 20|chrono alarm/.test(t);
+ const comp=hasP&&hasC?'Cronografo + perpetuo':hasP?'Calendario perpetuo':hasC?'Cronografo':/repeater|tourbillon|world time|hora mundi|triple calendar|moon|gmt|dual time|jump hour|memovox|maxi time|retrograde|annual calendar|explorer ii|time zones|jaquemarts|pulsations/.test(t)?'Altre complicazioni':'Solo tempo';
+ return {comp,lot,brand:p[1],model:p[2],ref:p[3],mat,matRaw:p[4],year:y,yr,era,low,high,mid:(low+high)/2,nr:p[8]=='Y',vat:p[9]=='Y',bp:p[10]=='Y',prov:p[11],note:p[12],d,ses:lot<=121?1:2}});
 const $=id=>document.getElementById(id);
+const lk=n=>`<a class="lk" target="_blank" rel="noopener" href="https://www.monacolegendauctions.com/auction/exclusive-timepieces-43/lot-${n}">${n}</a>`;
 const sum=a=>a.reduce((x,y)=>x+y,0);
 const group=(a,f)=>{const m={};a.forEach(x=>{const k=f(x);(m[k]=m[k]||[]).push(x)});return m};
 const COL=['#c9a45c','#4f8fd9','#4fbf8b','#e5645f','#9b7fd6','#e0a458','#5bc0be','#d96fa5','#8fb35b','#7c8aa6','#c78a6b','#6aa5d6','#b0b36b','#a06fd0','#d6c24f'];
 Chart.defaults.color='#8b94a7';Chart.defaults.borderColor='#2a3140';
-const mk=(id,type,labels,data,opt={})=>new Chart($(id),{type,data:{labels,datasets:[{data,backgroundColor:type=='bar'?'#c9a45c':COL,borderColor:'#181d27',borderWidth:type=='bar'?0:2}]},options:Object.assign({indexAxis:opt.h?'y':'x',plugins:{legend:{display:type!='bar',position:'right'}},maintainAspectRatio:true},opt.o||{})});
+const mk=(id,type,labels,data,opt={})=>new Chart($(id),{type,data:{labels,datasets:[{data,backgroundColor:type=='bar'?data.map((_,i)=>COL[i%COL.length]):COL,borderColor:'#181d27',borderWidth:type=='bar'?0:2}]},options:Object.assign({indexAxis:opt.h?'y':'x',plugins:{legend:{display:type!='bar',position:'right'}},maintainAspectRatio:!opt.tall},opt.o||{})});
 // nav
 const tabs=['Panoramica','Tutti i lotti','Driver d\'acquisto','Opportunita / No Reserve','Confronto mercato','Info & note'];
 tabs.forEach((t,i)=>{const b=document.createElement('button');b.textContent=t;if(!i)b.className='on';b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));$('t'+i).classList.add('on')};$('nav').appendChild(b)});
@@ -370,32 +379,42 @@ const tl=sum(L.map(x=>x.low)),th=sum(L.map(x=>x.high)),med=[...L].map(x=>x.mid).
 const brands=group(L,x=>x.brand);
 const kp=(v,l)=>`<div class="kpi"><span>${l}</span><b>${v}</b></div>`;
 $('kpis').innerHTML=kp(L.length,'Lotti totali')+kp(Object.keys(brands).length,'Marchi')+kp(fmt(tl),'Totale stime basse')+kp(fmt(th),'Totale stime alte')+kp(fmt(med[Math.floor(med.length/2)]),'Mid-stima mediana')+kp(L.filter(x=>x.nr).length,'Lotti No Reserve')+kp(L.filter(x=>x.mid>=100000).length,'Lotti con mid ≥ 100k')+kp(L.filter(x=>x.prov).length,'Lotti da collezioni');
-const bs=Object.entries(brands).map(([k,v])=>[k,v.length,sum(v.map(x=>x.mid))]).sort((a,b)=>b[1]-a[1]).slice(0,15);
-mk('c1','bar',bs.map(x=>x[0]),bs.map(x=>x[1]),{h:1});
-const bv=[...bs].sort((a,b)=>b[2]-a[2]);mk('c2','bar',bv.map(x=>x[0]),bv.map(x=>x[2]),{h:1});
+// brand charts: ALL brands
+const bs=Object.entries(brands).map(([k,v])=>[k,v.length,sum(v.map(x=>x.mid))]).sort((a,b)=>b[1]-a[1]||b[2]-a[2]);
+const hh=n=>Math.max(300,n*22+60);const yAll={scales:{y:{ticks:{autoSkip:false}}}};
+$('w1').style.height=hh(bs.length)+'px';mk('c1','bar',bs.map(x=>x[0]),bs.map(x=>x[1]),{h:1,tall:1,o:yAll});
+const bv=[...bs].sort((a,b)=>b[2]-a[2]);$('w2').style.height=hh(bv.length)+'px';mk('c2','bar',bv.map(x=>x[0]),bv.map(x=>x[2]),{h:1,tall:1,o:yAll});
 const bands=[['<10k',0,1e4],['10-20k',1e4,2e4],['20-50k',2e4,5e4],['50-100k',5e4,1e5],['100-250k',1e5,2.5e5],['250k-1M',2.5e5,1e6],['>1M',1e6,1e12]];
 mk('c3','bar',bands.map(b=>b[0]),bands.map(b=>L.filter(x=>x.mid>=b[1]&&x.mid<b[2]).length));
 const ms=Object.entries(group(L,x=>x.mat)).map(([k,v])=>[k,v.length]);mk('c4','doughnut',ms.map(x=>x[0]),ms.map(x=>x[1]));
 const eras=['Pre-1940','1940-59','1960-79','1980-99','2000+','n/d'];const eg=group(L,x=>x.era);
 mk('c5','bar',eras,eras.map(e=>(eg[e]||[]).length));
 mk('c6','bar',eras,eras.map(e=>(eg[e]||[]).length?Math.round(sum(eg[e].map(x=>x.mid))/eg[e].length):0));
-function tableTop(arr,id){$(id).innerHTML='<div class="wrap" style="max-height:none"><table><tr><th>Lotto</th><th>Marchio</th><th>Modello</th><th>Ref</th><th>Anno</th><th>Materiale</th><th class="num">Stima bassa</th><th class="num">Stima alta</th><th>Driver</th></tr>'+arr.map(x=>`<tr><td>${x.lot}</td><td>${x.brand}</td><td>${x.model}</td><td>${x.ref}</td><td>${x.year}</td><td>${x.mat}</td><td class="num">${fmt(x.low)}</td><td class="num">${fmt(x.high)}</td><td>${tg(x)}</td></tr>`).join('')+'</table></div>'}
+// complications
+const CO=['Solo tempo','Cronografo','Calendario perpetuo','Cronografo + perpetuo','Altre complicazioni'];const cg=group(L,x=>x.comp);
+mk('k1','doughnut',CO,CO.map(c=>(cg[c]||[]).length));
+mk('k2','bar',CO,CO.map(c=>sum((cg[c]||[]).map(x=>x.mid))));
+mk('k3','bar',CO,CO.map(c=>(cg[c]||[]).length?Math.round(sum(cg[c].map(x=>x.mid))/cg[c].length):0));
+const t10=bs.slice(0,10).map(x=>x[0]);
+new Chart($('k4'),{type:'bar',data:{labels:t10,datasets:CO.map((c,i)=>({label:c,data:t10.map(b=>L.filter(x=>x.brand==b&&x.comp==c).length),backgroundColor:COL[i]}))},options:{scales:{x:{stacked:true},y:{stacked:true}}}});
+function tableTop(arr,id){$(id).innerHTML='<div class="wrap" style="max-height:none"><table><tr><th>Lotto</th><th>Marchio</th><th>Modello</th><th>Ref</th><th>Anno</th><th>Materiale</th><th>Complicazione</th><th class="num">Stima bassa</th><th class="num">Stima alta</th><th>Driver</th></tr>'+arr.map(x=>`<tr><td>${lk(x.lot)}</td><td>${x.brand}</td><td>${x.model}</td><td>${x.ref}</td><td>${x.year}</td><td>${x.mat}</td><td>${x.comp}</td><td class="num">${fmt(x.low)}</td><td class="num">${fmt(x.high)}</td><td>${tg(x)}</td></tr>`).join('')+'</table></div>'}
 function tg(x){return x.d.map(k=>`<span class="tag ${k=='No Reserve'||k.startsWith('Full')?'g':k.startsWith('IVA')?'r':k.startsWith('Prov')?'y':''}">${k}</span>`).join('')}
-tableTop([...L].sort((a,b)=>b.mid-a.mid).slice(0,15),'top');
+tableTop([...L].sort((a,b)=>b.mid-a.mid).slice(0,30),'top');
 // lots table
 const uniq=(a)=>[...new Set(a)].sort();
 uniq(L.map(x=>x.brand)).forEach(b=>{$('fb').add(new Option(b,b));$('fb2').add(new Option(b,b))});
 uniq(L.map(x=>x.mat)).forEach(b=>$('fm').add(new Option(b,b)));
 uniq(L.flatMap(x=>x.d)).forEach(b=>$('fd').add(new Option(b,b)));
+CO.forEach(b=>$('fk').add(new Option(b,b)));
 let sk='lot',sd=1;
-const cols=[['lot','Lotto'],['ses','Sess.'],['brand','Marchio'],['model','Modello'],['ref','Ref'],['year','Anno'],['mat','Materiale'],['low','Stima bassa'],['high','Stima alta'],['mid','Mid'],['allin','All-in (stima alta + premio)'],['d','Driver / note']];
+const cols=[['lot','Lotto'],['ses','Sess.'],['brand','Marchio'],['model','Modello'],['ref','Ref'],['year','Anno'],['mat','Materiale'],['comp','Complicazione'],['low','Stima bassa'],['high','Stima alta'],['mid','Mid'],['allin','All-in (stima alta + premio)'],['d','Driver / note']];
 function render(){const q=$('q').value.toLowerCase(),pr=+$('prem').value/100;
- let a=L.filter(x=>(!q||(x.brand+x.model+x.ref+x.note+x.prov+x.matRaw).toLowerCase().includes(q))&&(!$('fb').value||x.brand==$('fb').value)&&(!$('fm').value||x.mat==$('fm').value)&&(!$('fs').value||x.ses==$('fs').value)&&(!$('fd').value||x.d.includes($('fd').value))&&(!$('pmin').value||x.mid>=+$('pmin').value)&&(!$('pmax').value||x.mid<=+$('pmax').value));
+ let a=L.filter(x=>(!q||(x.brand+x.model+x.ref+x.note+x.prov+x.matRaw).toLowerCase().includes(q))&&(!$('fb').value||x.brand==$('fb').value)&&(!$('fm').value||x.mat==$('fm').value)&&(!$('fs').value||x.ses==$('fs').value)&&(!$('fd').value||x.d.includes($('fd').value))&&(!$('fk').value||x.comp==$('fk').value)&&(!$('pmin').value||x.mid>=+$('pmin').value)&&(!$('pmax').value||x.mid<=+$('pmax').value));
  a.sort((x,y)=>{const u=x[sk==='allin'?'high':sk],v=y[sk==='allin'?'high':sk];return (u>v?1:u<v?-1:0)*sd});
  $('cnt').textContent=a.length+' lotti | mid totale '+fmt(sum(a.map(x=>x.mid)));
- $('tb').innerHTML='<tr>'+cols.map(c=>`<th onclick="sortBy('${c[0]}')">${c[1]}</th>`).join('')+'</tr>'+a.map(x=>`<tr><td>${x.lot}</td><td>${x.ses}</td><td>${x.brand}</td><td>${x.model}${x.prov?'<br><span class="tag y">'+x.prov+'</span>':''}</td><td>${x.ref}</td><td>${x.year}</td><td>${x.matRaw}</td><td class="num">${fmt(x.low)}</td><td class="num">${fmt(x.high)}</td><td class="num">${fmt(x.mid)}</td><td class="num">${fmt(x.high*(1+pr)*(x.vat?1.2:1))}</td><td>${x.note}<br>${tg(x)}</td></tr>`).join('')}
+ $('tb').innerHTML='<tr>'+cols.map(c=>`<th onclick="sortBy('${c[0]}')">${c[1]}</th>`).join('')+'</tr>'+a.map(x=>`<tr><td>${lk(x.lot)}</td><td>${x.ses}</td><td>${x.brand}</td><td>${x.model}${x.prov?'<br><span class="tag y">'+x.prov+'</span>':''}</td><td>${x.ref}</td><td>${x.year}</td><td>${x.matRaw}</td><td>${x.comp}</td><td class="num">${fmt(x.low)}</td><td class="num">${fmt(x.high)}</td><td class="num">${fmt(x.mid)}</td><td class="num">${fmt(x.high*(1+pr)*(x.vat?1.2:1))}</td><td>${x.note}<br>${tg(x)}</td></tr>`).join('')}
 window.sortBy=k=>{sd=sk==k?-sd:1;sk=k;render()};
-['q','fb','fm','fs','fd','pmin','pmax','prem'].forEach(i=>$(i).oninput=render);render();
+['q','fb','fm','fs','fd','fk','pmin','pmax','prem'].forEach(i=>$(i).oninput=render);render();
 // drivers
 const dn=uniq(L.flatMap(x=>x.d));const dc=dn.map(k=>[k,L.filter(x=>x.d.includes(k))]).sort((a,b)=>b[1].length-a[1].length);
 $('dk').innerHTML=dc.slice(0,6).map(([k,v])=>kp(v.length,k)).join('');
@@ -410,15 +429,38 @@ const nrs=L.filter(x=>x.nr);$('sk').innerHTML=kp(nrs.length,'Lotti No Reserve')+
 const nb2=Object.entries(group(nrs,x=>x.brand)).map(([k,v])=>[k,v.length]).sort((a,b)=>b[1]-a[1]);mk('s1','bar',nb2.map(x=>x[0]),nb2.map(x=>x[1]),{h:1});
 mk('s2','bar',['Sessione 1 (1-121)','Sessione 2 (122-234)'],[1,2].map(s=>sum(L.filter(x=>x.ses==s).map(x=>x.mid))));
 tableTop([...L].filter(x=>x.nr||(x.bp&&x.low<=10000)).sort((a,b)=>a.low-b.low),'short');
-// comparison
+// market comparison (Chrono24 / EveryWatch / WatchCharts)
+// Dati pubblici trovati su Chrono24 (annunci, prezzi richiesti, USD) - ricerca web 13-14/10/2026
+// Chiave = ref. oppure 'L'+numero lotto per valori specifici di un solo lotto
+const MKT={
+ '18038':{c:20046,cur:'USD',src:'Chrono24: media di 5 annunci ref. 18038 (prezzi richiesti, USD)'},
+ '16018':{c:17280,cur:'USD',src:'Chrono24: media di 5 annunci ref. 16018 oro giallo (10.995-22.014 USD, prezzi richiesti)'},
+ '1655':{c:35912,cur:'USD',src:'Chrono24: media di 4 annunci ref. 1655 (26.130-47.500 USD, prezzi richiesti)'},
+ '1611':{c:22168,cur:'USD',src:'Chrono24: 1 solo annuncio ref. 1611 oro giallo (22.168 USD, prezzo richiesto)'},
+ 'L6':{c:63033,cur:'USD',src:'Chrono24: 1 solo annuncio ref. 6265 acciaio (63.033 USD, prezzo richiesto)'},
+ 'L111':{c:63033,cur:'USD',src:'Chrono24: 1 solo annuncio ref. 6265 acciaio (63.033 USD, prezzo richiesto; il lotto ha quadrante tropical)'},
+ 'L229':{c:190000,cur:'USD',src:'Chrono24: 1 solo annuncio ref. 6265 oro giallo (190.000 USD, prezzo richiesto)'},
+ '1019':{c:33564,cur:'USD',src:'Chrono24: prezzo medio indicato sulla pagina Milgauss per quadrante CERN (circa 33.564 USD)'},
+ '16618':{c:35022,cur:'USD',src:'Chrono24: media di 4 annunci ref. 16618 (26.900-46.687 USD, prezzi richiesti)'},
+ '1803':{c:14000,cur:'USD',src:'Chrono24: prezzo medio annunci ref. 1803 circa 14.000 USD (range 5.500-25.000), oro rosa non distinto'},
+ '3800/1':{c:77990,cur:'USD',src:'Chrono24: media di 3 annunci ref. 3800/1 acciaio con box/extract (74.249-84.621 USD, prezzi richiesti)'},
+ '5402':{c:115167,cur:'USD',src:'Chrono24: media di 3 annunci ref. 5402 (97.475-133.025 USD, prezzi richiesti); una guida Chrono24 cita circa 67.000 USD per un esemplare ben tenuto'},
+ 'L60':{c:388987,cur:'USD',src:'Chrono24: media di 2 annunci Daytona 6239 Paul Newman (325.000 e 452.974 USD, prezzi richiesti)'}
+};
 const store=JSON.parse(localStorage.getItem('mkt')||'{}');
+const fxv=()=>+$('fx').value||0.9;
+function mv(x){const s=store[x.lot]||{};const m=MKT['L'+x.lot]||MKT[x.ref]||{};
+ const auto=!s.c&&!!m.c;const c=s.c||(m.c?Math.round(m.c*(m.cur=='USD'?fxv():1)):null);
+ const e=s.e||null,w=s.w||null;const v=[c,e,w].filter(Boolean);
+ return {c,e,w,auto,src:m.src||'',avg:v.length?sum(v)/v.length:null,n:v.length}}
 function rc(){const q=$('q2').value.toLowerCase(),b=$('fb2').value;
  const a=L.filter(x=>(!q||(x.brand+x.model+x.ref).toLowerCase().includes(q))&&(!b||x.brand==b));
- $('cmp').innerHTML='<tr><th>Lotto</th><th>Orologio</th><th class="num">Mid stima</th><th>Cerca</th><th>Chrono24 EUR</th><th>EveryWatch EUR</th><th class="num">Scarto vs mercato</th></tr>'+a.map(x=>{const s=store[x.lot]||{};const ref=s.e||s.c;const dl=ref?(x.mid/ref-1)*100:null;const qs=encodeURIComponent(x.brand+' '+x.model+' '+x.ref);
- return `<tr><td>${x.lot}</td><td>${x.brand} ${x.model} ${x.ref} (${x.year})</td><td class="num">${fmt(x.mid)}</td><td><a target="_blank" href="https://www.chrono24.it/search/index.htm?query=${qs}">Chrono24</a> | <a target="_blank" href="https://everywatch.com/search?q=${qs}">EveryWatch</a></td><td><input class="m" type="number" value="${s.c||''}" onchange="sv(${x.lot},'c',this.value)"></td><td><input class="m" type="number" value="${s.e||''}" onchange="sv(${x.lot},'e',this.value)"></td><td class="num ${dl==null?'':dl<=0?'pos':'neg'}">${dl==null?'-':dl.toFixed(0)+'%'}</td></tr>`}).join('');
- const f=L.filter(x=>store[x.lot]&&(store[x.lot].e||store[x.lot].c));$('cmpsum').textContent=f.length+' lotti confrontati';
- if(window.cch)cch.destroy();window.cch=new Chart($('cc'),{type:'bar',data:{labels:f.map(x=>'Lotto '+x.lot),datasets:[{label:'Mid stima',data:f.map(x=>x.mid),backgroundColor:'#c9a45c'},{label:'Mercato',data:f.map(x=>store[x.lot].e||store[x.lot].c),backgroundColor:'#4f8fd9'}]}})}
+ $('cmp').innerHTML='<tr><th>Lotto</th><th>Orologio</th><th class="num">Mid stima</th><th>Cerca</th><th>Chrono24 EUR</th><th>EveryWatch EUR</th><th>WatchCharts EUR</th><th class="num">Media mercato</th><th class="num">Scarto stima vs media</th></tr>'+a.map(x=>{const m=mv(x);const dl=m.avg?(x.mid/m.avg-1)*100:null;const qs=encodeURIComponent(x.brand+' '+x.model+' '+x.ref);
+ return `<tr><td>${lk(x.lot)}</td><td>${x.brand} ${x.model} ${x.ref} (${x.year})</td><td class="num">${fmt(x.mid)}</td><td><a target="_blank" href="https://www.chrono24.it/search/index.htm?query=${qs}">Chrono24</a> | <a target="_blank" href="https://everywatch.com/search?q=${qs}">EveryWatch</a> | <a target="_blank" href="https://www.google.com/search?q=site:watchcharts.com/watches+${qs}">WatchCharts</a></td><td><input class="m" type="number" value="${m.c||''}" title="${m.auto?m.src:''}" onchange="sv(${x.lot},'c',this.value)">${m.auto?'<br><span class="tag y">auto</span>':''}</td><td><input class="m" type="number" value="${m.e||''}" onchange="sv(${x.lot},'e',this.value)"></td><td><input class="m" type="number" value="${m.w||''}" onchange="sv(${x.lot},'w',this.value)"></td><td class="num">${m.avg?fmt(m.avg)+(m.n>1?'<br><span class="tag">'+m.n+' fonti</span>':''):'-'}</td><td class="num ${dl==null?'':dl<=0?'pos':'neg'}">${dl==null?'-':dl.toFixed(0)+'%'}</td></tr>`}).join('');
+ const f=L.filter(x=>mv(x).avg);$('cmpsum').textContent=f.length+' lotti con almeno una fonte';
+ if(window.cch)cch.destroy();window.cch=new Chart($('cc'),{type:'bar',data:{labels:f.map(x=>'Lotto '+x.lot),datasets:[{label:'Mid stima',data:f.map(x=>x.mid),backgroundColor:COL[0]},{label:'Media mercato',data:f.map(x=>mv(x).avg),backgroundColor:COL[1]}]}})}
 window.sv=(l,k,v)=>{store[l]=store[l]||{};store[l][k]=+v||0;localStorage.setItem('mkt',JSON.stringify(store));rc()};
-window.exportCSV=()=>{const r=['lotto,marchio,modello,ref,anno,low,high,mid,chrono24,everywatch'].concat(L.map(x=>{const s=store[x.lot]||{};return [x.lot,x.brand,'"'+x.model+'"',x.ref,x.year,x.low,x.high,x.mid,s.c||'',s.e||''].join(',')}));const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([r.join('\n')],{type:'text/csv'}));a.download='lotti_monaco_legend.csv';a.click()};
-['q2','fb2'].forEach(i=>$(i).oninput=rc);rc();
+window.exportCSV=()=>{const r=['lotto,marchio,modello,ref,anno,low,high,mid,chrono24,everywatch,watchcharts,media_mercato'].concat(L.map(x=>{const m=mv(x);return [x.lot,x.brand,'"'+x.model+'"',x.ref,x.year,x.low,x.high,x.mid,m.c||'',m.e||'',m.w||'',m.avg?Math.round(m.avg):''].join(',')}));const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([r.join('\n')],{type:'text/csv'}));a.download='lotti_monaco_legend.csv';a.click()};
+$('imp').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{t.split(/\r?\n/).slice(1).forEach(r=>{const p=r.split(/[;,]/);const l=+p[0];if(!l)return;store[l]={c:+p[1]||0,e:+p[2]||0,w:+p[3]||0}});localStorage.setItem('mkt',JSON.stringify(store));rc()})};
+['q2','fb2','fx'].forEach(i=>$(i).oninput=rc);rc();
 </script></body></html>
